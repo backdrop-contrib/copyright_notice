@@ -1,0 +1,96 @@
+<?php
+
+/**
+ * @file
+ * This module provides a tokenized website copyright notice.
+ */
+
+
+/**
+ * Implements hook_block_info().
+ */
+function copyright_notice_block_info() {
+
+  $info = array();
+  $info['copyright_notice'] = array(
+    'info' => t('Copyright notice'),
+    'description' => t('Tokenized website copyright notice.'),
+    'cache' => BACKDROP_CACHE_GLOBAL,
+  );
+
+  return $info;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ */
+function copyright_notice_block_configure($delta = '', $settings = array()) {
+
+  $form = array();
+
+  if ($delta == 'copyright_notice') {
+
+    $settings += array(
+      'content' => config_get('copyright_notice.settings', 'content'),
+    );
+
+    $form['copyright_notice_content'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Block content'),
+      '#description' => t('The content of the block as shown to the user. Example tokens: <strong>[date:custom:Y]</strong> => %date_custum_y, <strong>[site:name]</strong> => %site_name, <strong>[site:uri]</strong> => %site_url', array('%date_custum_y' => token_replace('[date:custom:Y]'), '%site_name' => token_replace('[site:name]'), '%site_url' => token_replace('[site:url]'))),
+      '#default_value' => $settings['content'],
+    );
+  }
+
+  return $form;
+}
+
+
+/**
+ * Implements hook_block_save().
+ */
+function copyright_notice_block_save($delta, &$edit = array()) {
+
+  if ($delta == 'copyright_notice') {
+
+    config_set('copyright_notice.settings', 'content', $edit['copyright_notice_content']);
+    unset($edit['copyright_notice_content']);
+  }
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function copyright_notice_block_view($delta = '', $settings = array(), $contexts = array()) {
+
+  $block = array();
+
+  if ($delta == 'copyright_notice') {
+
+    $settings += array(
+      'content' => config_get('copyright_notice.settings', 'content'),
+    );
+
+    $block['subject'] = t('Copyright notice');
+    $block['content'] = token_replace(t(filter_xss($settings['content'])));
+  }
+
+  return $block;
+}
+
+
+/**
+ * Implements hook_config_info().
+ */
+function copyright_notice_config_info() {
+
+  $prefixes = array();
+  $prefixes['copyright_notice.settings'] = array(
+    'label' => t('Copyright notice settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}

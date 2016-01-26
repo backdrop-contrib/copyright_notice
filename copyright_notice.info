@@ -1,0 +1,6 @@
+name = Copyright notice
+description = Provides a tokenized website copyright notice.
+backdrop = 1.x
+type = module
+dependencies[] = block
+configure = admin/structure/layouts
