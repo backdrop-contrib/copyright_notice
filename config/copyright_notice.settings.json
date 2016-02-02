@@ -1,4 +1,8 @@
 {
   "_config_name": "copyright_notice.settings",
-  "content": "Copyright &copy; [date:custom:Y] [site:name]. All rights reserved."
+  "title": "Copyright notice",
+  "body": {
+    "value": "Copyright &copy; [date:custom:Y] [site:name]. All rights reserved.",
+    "format": null
+  }
 }

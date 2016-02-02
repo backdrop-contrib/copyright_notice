@@ -2,7 +2,7 @@
 Copyright Notice
 ================
 
-This module provides a tokenized website copyright notice.
+This module provides a tokenized block to display a copyright notice.
 
 Installation
 ------------

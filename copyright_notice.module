@@ -2,7 +2,7 @@
 
 /**
  * @file
- * This module provides a tokenized website copyright notice.
+ * This module provides a tokenized block to display a copyright notice.
  */
 
 
@@ -11,14 +11,13 @@
  */
 function copyright_notice_block_info() {
 
-  $info = array();
-  $info['copyright_notice'] = array(
+  $blocks['copyright_notice'] = array(
     'info' => t('Copyright notice'),
-    'description' => t('Tokenized website copyright notice.'),
+    'description' => t('Tokenized block to display a copyright notice.'),
     'cache' => BACKDROP_CACHE_GLOBAL,
   );
 
-  return $info;
+  return $blocks;
 }
 
 
@@ -32,15 +31,37 @@ function copyright_notice_block_configure($delta = '', $settings = array()) {
   if ($delta == 'copyright_notice') {
 
     $settings += array(
-      'content' => config_get('copyright_notice.settings', 'content'),
+      'title' => config_get('copyright_notice.settings', 'title'),
+      'body' => config_get('copyright_notice.settings', 'body'),
     );
 
-    $form['copyright_notice_content'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Block content'),
-      '#description' => t('The content of the block as shown to the user. Example tokens: <strong>[date:custom:Y]</strong> => %date_custum_y, <strong>[site:name]</strong> => %site_name, <strong>[site:uri]</strong> => %site_url', array('%date_custum_y' => token_replace('[date:custom:Y]'), '%site_name' => token_replace('[site:name]'), '%site_url' => token_replace('[site:url]'))),
-      '#default_value' => $settings['content'],
+    $variables = array(
+      'text' => t('Browse available tokens.'),
+      'token_types' => array('date'),
     );
+
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Display title'),
+      '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+      '#default_value' => $settings['title'],
+      '#maxlength' => 255,
+      '#states' => array(
+        'visible' => array(
+          '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
+        ),
+      ),
+    );
+    $form['body'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Block content'),
+      '#description' => theme('token_tree_link', $variables),
+      '#default_value' => $settings['body']['value'],
+      '#format' => $settings['body']['format'],
+      '#rows' => 8,
+      '#element_validate' => array('token_element_validate'),
+      '#token_types' => array('date'),
+     );
   }
 
   return $form;
@@ -54,8 +75,13 @@ function copyright_notice_block_save($delta, &$edit = array()) {
 
   if ($delta == 'copyright_notice') {
 
-    config_set('copyright_notice.settings', 'content', $edit['copyright_notice_content']);
-    unset($edit['copyright_notice_content']);
+    $config = config('copyright_notice.settings');
+    $config->set('title', $edit['title']);
+    $config->set('body', $edit['body']);
+    $config->save();
+
+    unset($edit['title']);
+    unset($edit['body']);
   }
 }
 
@@ -70,11 +96,12 @@ function copyright_notice_block_view($delta = '', $settings = array(), $contexts
   if ($delta == 'copyright_notice') {
 
     $settings += array(
-      'content' => config_get('copyright_notice.settings', 'content'),
+      'title' => config_get('copyright_notice.settings', 'title'),
+      'body' => config_get('copyright_notice.settings', 'body'),
     );
 
-    $block['subject'] = t('Copyright notice');
-    $block['content'] = token_replace(t(filter_xss($settings['content'])));
+    $block['subject'] = strlen($settings['title']) ? check_plain($settings['title']) : NULL;
+    $block['content'] = check_markup(token_replace($settings['body']['value']), $settings['body']['format'], '', TRUE);
   }
 
   return $block;
@@ -86,9 +113,8 @@ function copyright_notice_block_view($delta = '', $settings = array(), $contexts
  */
 function copyright_notice_config_info() {
 
-  $prefixes = array();
   $prefixes['copyright_notice.settings'] = array(
-    'label' => t('Copyright notice settings'),
+    'label' => t('Copyright Notice settings'),
     'group' => t('Configuration'),
   );
 

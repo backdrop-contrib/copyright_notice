@@ -1,6 +1,7 @@
-name = Copyright notice
-description = Provides a tokenized website copyright notice.
+name = Copyright Notice
+description = Provides a tokenized block to display a copyright notice.
 backdrop = 1.x
+package = Layout
 type = module
 dependencies[] = block
 configure = admin/structure/layouts
